@@ -189,33 +189,6 @@ trait FileSystem extends org.specs2.io.FileReader with org.specs2.io.FileWriter 
     extractEntry(zis.getNextEntry)
     zis.close
   }
-  /*
-  def unjar(path: String, dirPath: String, regexFilter: String) {
-	 mkdirs(dirPath)
-   val fis = new FileInputStream(path)
-   val zis = new ZipInputStream(new BufferedInputStream(fis))
-   var entry: ZipEntry = null
-   def extractEntry(entry: ZipEntry) {
-     if (entry != null) {
-       if (entry.getName.matches(regexFilter)) {
-		     if (entry.isDirectory()){
-		       createDir(dirPath + "/" + entry.getName)
-		     } else {
-		       createFile(dirPath + "/" + entry.getName)
-		       val fos = new FileOutputStream(dirPath + "/" + entry.getName)
-		       val dest = new BufferedOutputStream(fos, 2048)
-		       copy(zis, dest)
-             dest.flush
-		       dest.close
-		     }
-         
-       }
-       extractEntry(zis.getNextEntry)
-     }
-   } 
-   extractEntry(zis.getNextEntry)
-   zis.close
-  }*/
   
   /** 
    * Copy an input stream to an output stream.
@@ -251,18 +224,6 @@ trait FileSystem extends org.specs2.io.FileReader with org.specs2.io.FileWriter 
     for (url <- Option(folderUrl) if folderUrl.getProtocol != "jar")
       copyDir(url, outputDir + src)
   }
-
-  /*
-  def copySpecResourcesDir(src: String, outputDir: String) {
-    val jarUrl = Thread.currentThread.getContextClassLoader.getResource(getClass.getName.replace(".", "/")+".class")
-    for (url <- Option(jarUrl) if url.toString.startsWith("jar"))
-      unjar(getPath(url).takeWhile(_ != '!').mkString, outputDir, ".*" + src + "/.*")
-
-    val folderUrl = Thread.currentThread.getContextClassLoader.getResource(src)
-    for (url <- Option(folderUrl) if !folderUrl.toString.startsWith("jar"))
-      copyDir(url, outputDir + src)
-  }
-   */
 
   /** @return true if 2 paths are the same according to their canonical representation */
   def samePath(p1: String, p2: String) = new File(p1).getCanonicalPath == new File(p2).getCanonicalPath
