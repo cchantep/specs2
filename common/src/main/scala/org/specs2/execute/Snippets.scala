@@ -59,7 +59,7 @@ trait Snippets {
   def termName(m: Any): String            = macro Macros.termName
 }
 
-import reflect.MacroContext._
+import org.specs2.reflect.MacroContext._
 
 object Snippets extends Snippets {
   def create[T](c: Context)(code: c.Expr[T])(params: c.Expr[SnippetParams[T]]): c.Expr[Snippet[T]] = {

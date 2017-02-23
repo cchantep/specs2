@@ -22,6 +22,9 @@ import SonatypeKeys._
 import depends._
 import com.ambiata.promulgate.project.ProjectPlugin._
 
+import org.scalajs.sbtplugin.ScalaJSPlugin
+import org.scalajs.sbtplugin.cross.{ CrossProject, CrossType }
+
 object build extends Build {
   type Settings = Def.Setting[_]
 
@@ -35,10 +38,10 @@ object build extends Build {
       releaseSettings          ++
       siteSettings             ++
       Seq(name := "specs2", packagedArtifacts := Map.empty)
-  ).aggregate(
-    common, matcher, matcherExtra, core, cats, scalaz, html, analysis,
+  ).aggregate(common, commonJS).
+    aggregate(matcher, matcherExtra, core, cats, scalaz, html, analysis,
     shapeless, form, markdown, gwt, junit, scalacheck, mock, tests)
-   .enablePlugins(GitBranchPrompt)
+   .enablePlugins(GitBranchPrompt, ScalaJSPlugin)
 
   /** COMMON SETTINGS */
   lazy val specs2Settings: Seq[Settings] = Seq(
@@ -69,6 +72,25 @@ object build extends Build {
     Seq(name := "specs2-analysis")
   ).dependsOn(common % "test->test", core, matcher, scalacheck % "test")
 
+  lazy val pureCommon = CrossProject(
+    id = "pureCommon", base = file("common"), crossType = CrossType.Pure).
+    settings(moduleSettings("common") ++ Seq(
+      conflictWarning ~= { _.copy(failOnConflict = false) }, // lame
+      libraryDependencies ++=
+        depends.scalaz(scalazVersion.value) ++
+        depends.reflect(scalaVersion.value) ++
+        depends.paradise(scalaVersion.value) ++
+        depends.scalaParser(scalaVersion.value) ++
+        depends.scalaXML(scalaVersion.value) ++
+        depends.scalacheck(scalaVersion.value).map(_ % "test") ++
+        depends.si2712Dependency(scalaVersion.value),
+      name := "specs2-common"
+    ))
+
+  lazy val common = pureCommon.jvm
+  lazy val commonJS = pureCommon.js
+
+  /*
   lazy val common = Project(id = "common", base = file("common"),
     settings = moduleSettings("common") ++
       Seq(conflictWarning ~= { _.copy(failOnConflict = false) }, // lame
@@ -83,6 +105,7 @@ object build extends Build {
         name := "specs2-common"
       )
   )
+   */
 
   lazy val core = Project(id = "core", base = file("core"),
     settings = Seq(
@@ -256,7 +279,7 @@ object build extends Build {
     cancelable in Global := true,
     testFrameworks := Seq(TestFramework("org.specs2.runner.Specs2Framework")),
     javaOptions ++= Seq("-Xmx3G", "-Xss4M"),
-    fork in (ThisBuild, Test) := true,
+    //fork in (ThisBuild, Test) := true,
     testOptions := Seq(Tests.Filter(s =>
       (Seq(".guide.").exists(s.contains) || Seq("Spec", "Guide", "Website").exists(s.endsWith)) &&
         Seq("Specification", "FeaturesSpec").forall(n => !s.endsWith(n))))
