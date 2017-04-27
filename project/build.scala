@@ -73,22 +73,23 @@ object build extends Build {
       notificationSettings
 
   /** MODULES (sorted in alphabetical order) */
-  lazy val analysis =
-    CrossProject(id = "analysis", base = file("analysis"), crossType = CrossType.Pure)
-      .settings(
-        moduleSettings("analysis") ++
-        Seq(
-          name := "specs2-analysis",
-          libraryDependencies ++=
-            depends.classycle ++
-            depends.compiler(scalaOrganization.value, scalaVersion.value))
-        )
-      ).dependsOn(
-        common % "test->test",
-        core,
-        matcher,
-        scalacheck % "test"
-      )
+  lazy val analysis = CrossProject(
+    id = "analysis",
+    base = file("analysis"),
+    crossType = CrossType.Pure
+  ).settings(moduleSettings("analysis") ++
+    Seq(
+      name := "specs2-analysis",
+      libraryDependencies ++=
+        depends.classycle ++
+        depends.compiler(scalaOrganization.value, scalaVersion.value)
+    )
+  ).dependsOn(
+    common % "test->test",
+    core,
+    matcher,
+    scalacheck % "test"
+  )
 
   lazy val analysisJVM = analysis.jvm
   lazy val analysisJS = analysis.js
@@ -409,8 +410,8 @@ object build extends Build {
     logBuffered := false,
     cancelable in Global := true,
     testFrameworks := Seq(TestFramework("org.specs2.runner.Specs2Framework")),
-    javaOptions ++= Seq("-Xmx3G", "-Xss4M"),
-    fork in (ThisBuild, Test) := true,
+    //javaOptions ++= Seq("-Xmx3G", "-Xss4M"),
+    //fork in (ThisBuild, Test) := true,
     testOptions := Seq(Tests.Filter(s =>
       (Seq(".guide.").exists(s.contains) || Seq("Spec", "Guide", "Website").exists(s.endsWith)) &&
         Seq("Specification", "FeaturesSpec").forall(n => !s.endsWith(n))))
